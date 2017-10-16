@@ -1,0 +1,20 @@
+Package: spraphal
+Type: Package
+Title: Sparse Graph-based Analysis
+Version: 0.1.0
+Author: Christopher Nobles, Ph.D.
+Maintainer: Christopher Nobles <cnobles@pennmedicine.upenn.edu>
+Description: R-package for assitance with graph-based analytics
+	of sparse networks, ex. protein-protein interactions.
+License: GNU General Public License v3
+LazyData: TRUE
+Depends:
+    R (>= 3.0),
+    igraph (>= 1.0.1),
+    stats (>= 3.0),
+    ggnet (>= 0.1.0)
+Suggests:
+    devtools,
+    roxygen2,
+    testthat
+RoxygenNote: 6.0.1.9000
