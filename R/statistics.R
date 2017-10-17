@@ -35,11 +35,10 @@ comp_lambda <- function(el, G, elcols = c(1,2)){
     all(c(is.numeric(elcols), length(elcols) == 2, max(elcols) <= ncol(el))))
 
   # Check for vertices in graph G
-  vu <- unique(c(el[,elcols[1]], el[,elcols[2]]))
+  vu <- unique(c(as.character(el[,elcols[1]]), as.character(el[,elcols[2]])))
   vo <- vu[!vu %in% V(G)$name]
   if(length(vo) > 0){
     message("Vertices not present in graph: ", paste(vo, collapse = ", "), ".")
-    message("Noted vertices removed from edge list.")
     el <- el[el[,!elcols[1]] %in% vo | !el[,elcols[2]] %in% vo,]
   }
 
@@ -79,7 +78,6 @@ comp_lambda_bipartite <- function(v1, v2, G){
   vo <- vu[!vu %in% V(G)$name]
   if(length(vo) > 0){
     message("Vertices not present in graph: ", paste(vo, collapse = ", "), ".")
-    message("Noted vertices removed from edge list.")
     v1 <- v1[!v1 %in% vo]
     v2 <- v2[!v2 %in% vo]
   }
@@ -130,16 +128,15 @@ comp_edgeset_prob <- function(el, G, maxEdgeCnt,
     all(c(is.numeric(elcols), length(elcols) == 2, max(elcols) <= ncol(el))))
 
   # Check for vertices in graph G
-  vu <- unique(c(el[,elcols[1]], el[,elcols[2]]))
+  vu <- unique(c(as.character(el[,elcols[1]]), as.character(el[,elcols[2]])))
   vo <- vu[!vu %in% V(G)$name]
   if(length(vo) > 0){
     message("Vertices not present in graph: ", paste(vo, collapse = ", "), ".")
-    message("Noted vertices removed from edge list.")
     el <- el[el[,!elcols[1]] %in% vo | !el[,elcols[2]] %in% vo,]
   }
 
   # Calculate lamda, alpha, and approximate the probability of the edge set
-  vu <- unique(c(el[,elcols[1]], el[,elcols[2]]))
+  vu <- unique(c(as.character(el[,elcols[1]]), as.character(el[,elcols[2]])))
   lam <- comp_lambda(el, G, elcols = elcols)
 
   if(exact){
@@ -209,7 +206,7 @@ enrich_vertex <- function(v, G){
     required, require, character.only = TRUE, quietly = TRUE)))
 
   # Check for vertices in graph
-  vo <- v[!v %in% names(as.list(V(G)))]
+  vo <- v[!v %in% V(G)$name]
   if(length(vo) > 0){
     message("Vertices not present in graph: ", paste(vo, collapse = ", "), ".")
     v <- v[!v %in% vo]
@@ -231,6 +228,66 @@ enrich_vertex <- function(v, G){
       return(prob)
     }
   }, vset = v, el = sGel, G = G)
+}
+
+#' Approximate the probability of a vertex not within a list belonging to the
+#' list
+#'
+#' @param v1 vector of vertex identifiers. Vertices must be present in graph G.
+#' @param v2 vector of vertex identifiers not in `v1`. These vertices will be
+#' tested as a vertex in `v1`.
+#' @param G igraph object representing the graph and including vertices from
+#' `v1` and `v2`.
+#'
+#' @author Christopher Nobles, Ph.D.
+#' @export
+
+enrich_outside_vertex <- function(v1, v2, G){
+  required <- c("igraph", "stats")
+  stopifnot(all(sapply(
+    required, require, character.only = TRUE, quietly = TRUE)))
+
+  # All vertices in v1 and v2 must be present in graph G
+  vu <- unique(c(v1, v2))
+  vo <- vu[!vu %in% names(as.list(V(G)))]
+  if(length(vo) > 0){
+    message(paste0(
+      "Vertices not in supplied graph: ",
+      paste(v_not_present, collapse = ", "), "."))
+    v1 <- v1[!v1 %in% v_not_present]
+    v2 <- v2[!v2 %in% v_not_present]
+  }
+
+  # Lists cannot intersect
+  # Intersecting object in lists will be removed and messaged.
+  vn <- v1[v1 %in% v2]
+  if(length(vn) > 0){
+    message(
+      "Vertices identified between lists: ", paste(vn, collapse = ", "), ".")
+    v1 <- v1[!v1 %in% vn]
+    v2 <- v2[!v2 %in% vn]
+  }
+
+  if(length(v1) == 0 | length(v2) == 0){
+    return(NA)
+  }else{
+    return(sapply(v2, function(vq, vset, G){
+      # Identify edges with new vertex
+      el <- as.data.frame(as_edgelist(induced_subgraph(G, c(vset, vq))))
+      names(el) <- c("vi", "vj")
+      el$vi_ori <- ifelse(el$vi == vq, "q", "set")
+      el$vj_ori <- ifelse(el$vj == vq, "q", "set")
+      el <- el[el$vi_ori != el$vj_ori,]
+
+      # Compute probability
+      if(nrow(el) == 0){
+        return(NA)
+      }else{
+        prob <- comp_edgeset_prob(el, G, length(vset))
+        return(prob)
+      }
+    }, vset = v1, G = G))
+  }
 }
 
 #' Approximate the probability of interactions between two subgraphs, a
