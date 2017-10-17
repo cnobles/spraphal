@@ -115,11 +115,14 @@ comp_lambda_bipartite <- function(v1, v2, G){
 #' @param elcols numeric vector of length 2, indicating the two columns of the
 #' input data.frame or matrix (`el`) which contain the edge list data, defaults
 #' to 1 and 2.
+#' @param exact logical. If TRUE, the approximation of the probability is
+#' calculated rather than approximated by `ppois()`.
 #'
 #' @author Christopher Nobles, Ph.D.
 #' @export
 
-comp_edgeset_prob <- function(el, G, maxEdgeCnt, elcols = c(1,2)){
+comp_edgeset_prob <- function(el, G, maxEdgeCnt,
+                              elcols = c(1,2), exact = TRUE){
   # Check inputs
   stopifnot(class(el) %in% c("data.frame", "matrix"))
   stopifnot(class(G) == "igraph")
@@ -138,12 +141,20 @@ comp_edgeset_prob <- function(el, G, maxEdgeCnt, elcols = c(1,2)){
   # Calculate lamda, alpha, and approximate the probability of the edge set
   vu <- unique(c(el[,elcols[1]], el[,elcols[2]]))
   lam <- comp_lambda(el, G, elcols = elcols)
-  prb <- (
-    exp(ppois(maxEdgeCnt, lam, log.p = TRUE)) - 
-      exp(ppois(nrow(el), lam, log.p = TRUE))) / 
-    (exp(ppois(maxEdgeCnt, lam, log.p = TRUE)) - 
-       exp(ppois(0, lam, log.p = TRUE))
-    )
+
+  if(exact){
+    alp <- exp(-lam) * sum(sapply(0:maxEdgeCnt, function(h, lam){
+      exp( h * log(lam) - lfactorial(h))}, lam = lam))
+    prb <- exp(-lam) * sum(sapply(nrow(el):maxEdgeCnt, function(h, lam){
+      exp( h * log(lam) - lfactorial(h))}, lam = lam))
+  }else{
+    prb <- (
+      exp(ppois(maxEdgeCnt, lam, log.p = TRUE)) -
+        exp(ppois(nrow(el), lam, log.p = TRUE))) /
+      (exp(ppois(maxEdgeCnt, lam, log.p = TRUE)) -
+         exp(ppois(0, lam, log.p = TRUE))
+      )
+  }
   return(prb)
 }
 
@@ -236,7 +247,7 @@ enrich_vertex <- function(v, G){
 #' @author Christopher Nobles, Ph.D.
 #' @export
 
-enrich_bipartite <- function(v1, v2, G, ...){
+enrich_bipartite <- function(v1, v2, G){
   required <- c("igraph", "stats")
   stopifnot(all(sapply(
     required, require, character.only = TRUE, quietly = TRUE)))
