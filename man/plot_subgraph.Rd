@@ -7,7 +7,7 @@
 plot_subgraph(v, G, ...)
 }
 \arguments{
-\item{v}{vector of vertex identifiers. All vertex identifiers need to be 
+\item{v}{vector of vertex identifiers. All vertex identifiers need to be
 present in the graph G.}
 
 \item{G}{igraph object of which v vertices will be used to create a subgraph.}

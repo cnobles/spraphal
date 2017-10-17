@@ -7,13 +7,13 @@
 comp_lambda(el, G, elcols = c(1, 2))
 }
 \arguments{
-\item{el}{data.frame/matrix edgelist where column 1 and column 2 contain the 
+\item{el}{data.frame/matrix edgelist where column 1 and column 2 contain the
 lists of connected vertices of interest.}
 
 \item{G}{igraph graph of which vertices from `el` are present.}
 
-\item{elcols}{numeric vector of length 2, indicating the two columns of the 
-input data.frame or matrix (`el`) which contain the edge list data, defaults 
+\item{elcols}{numeric vector of length 2, indicating the two columns of the
+input data.frame or matrix (`el`) which contain the edge list data, defaults
 to 1 and 2.}
 }
 \description{

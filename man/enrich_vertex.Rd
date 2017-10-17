@@ -2,7 +2,7 @@
 % Please edit documentation in R/statistics.R
 \name{enrich_vertex}
 \alias{enrich_vertex}
-\title{Approximate the probability of each vertex within a list belonging to the 
+\title{Approximate the probability of each vertex within a list belonging to the
 list}
 \usage{
 enrich_vertex(v, G)
@@ -13,7 +13,7 @@ enrich_vertex(v, G)
 \item{G}{igraph object representing the graph and including vertices from v.}
 }
 \description{
-Approximate the probability of each vertex within a list belonging to the 
+Approximate the probability of each vertex within a list belonging to the
 list
 }
 \author{

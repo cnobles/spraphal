@@ -59,6 +59,9 @@ construct_graph <- function(E, V = NULL, ecols = c(1,2), vcol = 1,
 #' the two subgraphs indicated by the vertex lists.
 #' @param edges logical. If TRUE, the edges rather than the count will be
 #' returned as a data.frame with two columns named "vi" and "vj".
+#'
+#' @author Christopher Nobles, Ph.D.
+#' @export
 
 count_edges <- function(G, v1, v2 = NULL, edges = FALSE){
   stopifnot(require("igraph"))
@@ -114,6 +117,8 @@ count_edges <- function(G, v1, v2 = NULL, edges = FALSE){
 #' vertices from the list.
 #' @param collect logical. If TRUE, the output will contain a listed object with
 #' the names of `pruned_list` and `removed_vertices`.
+#' @author Christopher Nobles, Ph.D.
+#' @export
 
 prune_by_enrich <- function(G, v, cutoff, collect = FALSE){
   stopifnot(require("igraph"))
@@ -149,6 +154,8 @@ prune_by_enrich <- function(G, v, cutoff, collect = FALSE){
 #' vertices from `v2` to `v1` the list.
 #' @param collect logical. If TRUE, the output will contain a listed object with
 #' the names of `adjusted_list` and `remaining_vertices`.
+#' @author Christopher Nobles, Ph.D.
+#' @export
 
 append_by_enrich <- function(G, v1, v2, cutoff, collect = FALSE){
   stopifnot(require("igraph"))
@@ -186,24 +193,3 @@ append_by_enrich <- function(G, v1, v2, cutoff, collect = FALSE){
       "remaining_vertices" = v2[!v2 %in% names(p)]))
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

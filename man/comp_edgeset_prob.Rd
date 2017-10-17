@@ -4,20 +4,23 @@
 \alias{comp_edgeset_prob}
 \title{Compute edgeset probability}
 \usage{
-comp_edgeset_prob(el, G, maxEdgeCnt, elcols = c(1, 2))
+comp_edgeset_prob(el, G, maxEdgeCnt, elcols = c(1, 2), exact = TRUE)
 }
 \arguments{
-\item{el}{data.frame/matrix edgelist where column 1 and column 2 contain the 
+\item{el}{data.frame/matrix edgelist where column 1 and column 2 contain the
 lists of connected vertices of interest.}
 
 \item{G}{igraph graph of which vertices from `el` are present.}
 
-\item{maxEdgeCnt}{numeric maximum number of edges that could be obsersered 
+\item{maxEdgeCnt}{numeric maximum number of edges that could be obsersered
 given vertices within edgelist.}
 
-\item{elcols}{numeric vector of length 2, indicating the two columns of the 
-input data.frame or matrix (`el`) which contain the edge list data, defaults 
+\item{elcols}{numeric vector of length 2, indicating the two columns of the
+input data.frame or matrix (`el`) which contain the edge list data, defaults
 to 1 and 2.}
+
+\item{exact}{logical. If TRUE, the approximation of the probability is
+calculated rather than approximated by `ppois()`.}
 }
 \description{
 Compute edgeset probability

@@ -2,13 +2,13 @@
 % Please edit documentation in R/plots.R
 \name{plot_cluster}
 \alias{plot_cluster}
-\title{Plot cluster with probablistic coloring of the nodes with relation to the 
+\title{Plot cluster with probablistic coloring of the nodes with relation to the
 cluster.}
 \usage{
 plot_cluster(v, G, ...)
 }
 \arguments{
-\item{v}{vector of vertex identifiers. All vertex identifiers need to be 
+\item{v}{vector of vertex identifiers. All vertex identifiers need to be
 present in the graph G.}
 
 \item{G}{igraph object of which v vertices will be used to create a subgraph.}
@@ -16,7 +16,7 @@ present in the graph G.}
 \item{...}{arguments to be passed into ggnet2.}
 }
 \description{
-Plot cluster with probablistic coloring of the nodes with relation to the 
+Plot cluster with probablistic coloring of the nodes with relation to the
 cluster.
 }
 \author{

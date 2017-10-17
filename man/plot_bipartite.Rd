@@ -7,10 +7,10 @@
 plot_bipartite(v1, v2, G, ..., quiet = FALSE)
 }
 \arguments{
-\item{v1}{vector of vertex identifiers for subgraph g1. All vertex 
+\item{v1}{vector of vertex identifiers for subgraph g1. All vertex
 identifiers need to be present in the graph G.}
 
-\item{v2}{vector of vertex identifiers for subgraph g2. All vertex 
+\item{v2}{vector of vertex identifiers for subgraph g2. All vertex
 identifiers need to be present in the graph G.}
 
 \item{G}{igraph object of which v1 and v2 vertices will be used to create a

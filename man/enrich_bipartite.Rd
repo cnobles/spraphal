@@ -2,14 +2,14 @@
 % Please edit documentation in R/statistics.R
 \name{enrich_bipartite}
 \alias{enrich_bipartite}
-\title{Approximate the probability of interactions between two subgraphs, a 
+\title{Approximate the probability of interactions between two subgraphs, a
 bipartite comparison}
 \usage{
-enrich_bipartite(v1, v2, G, ...)
+enrich_bipartite(v1, v2, G)
 }
 \arguments{
 \item{v1}{vector of vertex identifiers, indicating the vertices present in
-subgraph 1. Vertex identifiers need to be the names of vertices in G. "v1" 
+subgraph 1. Vertex identifiers need to be the names of vertices in G. "v1"
 vertices will be used to create g1 subgraph.}
 
 \item{v2}{vector of vertex identifiers. Same criteria as L1. L1 and L2 for
@@ -19,7 +19,7 @@ be removed during analysis. "v2" vertices will be used to create g2 subgraph.}
 \item{G}{igraph object of which g1 and g2 subgraphs will be created from.}
 }
 \description{
-Approximate the probability of interactions between two subgraphs, a 
+Approximate the probability of interactions between two subgraphs, a
 bipartite comparison
 }
 \author{

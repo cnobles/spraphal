@@ -11,7 +11,7 @@ map_names(data, names = "gene_name", refdata, refcol = "preferred_name",
 \arguments{
 \item{data}{data.frame with column specified by the `names` parameter.}
 
-\item{names}{character specifying the column name in data containing the 
+\item{names}{character specifying the column name in data containing the
 `names` of to be mapped from.}
 
 \item{refdata}{data.frame with reference data. Needs to contain the columns
@@ -20,10 +20,10 @@ referred to by `refcol` and `refout`.}
 \item{refcol}{character the name of the column with matching information for
 the `names` parameter.}
 
-\item{refout}{character the name of the column for in the reference with the 
+\item{refout}{character the name of the column for in the reference with the
 information to be mapped to data.}
 
-\item{outname}{character the name given to the new information mapped to the 
+\item{outname}{character the name given to the new information mapped to the
 `data` data.frame.}
 
 \item{removeUnmapped}{logical indicating if rows should be removed if
