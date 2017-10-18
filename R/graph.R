@@ -193,3 +193,70 @@ append_by_enrich <- function(G, v1, v2, cutoff, collect = FALSE){
       "remaining_vertices" = v2[!v2 %in% names(p)]))
   }
 }
+
+#' Append vertices in a list to vertex lists depending on enrichment
+#'
+#' @param G igraph which contains vertex identifiers present in `L` and `v`.
+#' @param L list of vectors with vertex identifiers. This list will function as
+#' the base lists for which vertices from `v` will be added to based on the best
+#' enrichment.
+#' @param v vector of vertex identifiers to be added to vertex lists in `L`.
+#' Vertices will only be added if they are below the `cutoff` p-value. If there
+#' are multiple possibilities, vertices will only be added to the most
+#' significant match.
+#' @param cutoff numeric. Cutoff enrichment value (p-value) for which to add
+#' vertices from `v` to vectors in `L`.
+#' @param collect logical. If TRUE, the output will contain a listed object with
+#' the names of `adjusted_lists` and `remaining_vertices`.
+
+append_vertices_to_lists <- function(G, L, v, cutoff, collect = FALSE){
+  stopifnot(require("igraph"))
+  stopifnot(class(G) == "igraph")
+
+  # Intersecting vertices in lists need to be removed
+  vn <- v[v %in% unique(unlist(L))]
+  if(length(vn) > 0){
+    stop(
+      "Vertices within 'v' are already present in 'L'. Intersecting vertices: ",
+      paste(vn, collapse = ", "), ".")
+  }
+
+  # Check for vertices in graph G
+  vu <- unique(c(v, unique(unlist(L))))
+  vo <- vu[!vu %in% V(G)$name]
+  if(length(vo) > 0){
+    stop(
+      "Not all vertices present in graph 'G'. Missing vertices: ",
+      paste(vo, collapse = ", "), ".")
+  }
+
+  # Construct matrix of potential assignment, cols -> L, rows -> v
+  # Identify best match and associated pvalue
+  assign_matrix <- sapply(L, enrich_outside_vertex, v2 = v, G = G)
+  na_rows <- sapply(1:nrow(assign_matrix), function(i){
+    sum(as.integer(is.na(assign_matrix[i,])))}) == length(L)
+  assign_matrix <- assign_matrix[!na_rows,]
+  best_match <- sapply(1:nrow(assign_matrix), function(i){
+    which(assign_matrix[i,] == min(assign_matrix[i,], na.rm = TRUE))})
+  min_pvals <- sapply(1:nrow(assign_matrix), function(i){
+    min(assign_matrix[i,], na.rm = TRUE)})
+
+  # Filter and select which vertices from v to add to L lists
+  v_df <- data.frame(
+    v = row.names(assign_matrix), list = best_match, pval = min_pvals)
+  v_df <- v_df[v_df$pval <= cutoff,]
+  L_adj <- lapply(1:length(L), function(i){
+    l <- L[[i]]
+    df <- v_df[v_df$list == i,]
+    return(c(l, as.character(df$v)))
+  })
+
+  if(!collect){
+    return(L_adj)
+  }else{
+    return(list(
+      "adjusted_lists" = L_adj,
+      "remaining_vertices" = v[!v %in% unique(unlist(L_adj))]
+    ))
+  }
+}
