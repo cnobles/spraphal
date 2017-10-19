@@ -233,23 +233,28 @@ append_vertices_to_lists <- function(G, L, v, cutoff, collect = FALSE){
   # Construct matrix of potential assignment, cols -> L, rows -> v
   # Identify best match and associated pvalue
   assign_matrix <- sapply(L, enrich_outside_vertex, v2 = v, G = G)
+  # Errors out if the matrix is only NA
   na_rows <- sapply(1:nrow(assign_matrix), function(i){
     sum(as.integer(is.na(assign_matrix[i,])))}) == length(L)
   assign_matrix <- assign_matrix[!na_rows,]
-  best_match <- sapply(1:nrow(assign_matrix), function(i){
-    which(assign_matrix[i,] == min(assign_matrix[i,], na.rm = TRUE))})
-  min_pvals <- sapply(1:nrow(assign_matrix), function(i){
-    min(assign_matrix[i,], na.rm = TRUE)})
+  if(nrow(assign_matrix) > 0){
+    best_match <- sapply(1:nrow(assign_matrix), function(i){
+      which(assign_matrix[i,] == min(assign_matrix[i,], na.rm = TRUE))})
+    min_pvals <- sapply(1:nrow(assign_matrix), function(i){
+      min(assign_matrix[i,], na.rm = TRUE)})
 
-  # Filter and select which vertices from v to add to L lists
-  v_df <- data.frame(
-    v = row.names(assign_matrix), list = best_match, pval = min_pvals)
-  v_df <- v_df[v_df$pval <= cutoff,]
-  L_adj <- lapply(1:length(L), function(i){
-    l <- L[[i]]
-    df <- v_df[v_df$list == i,]
-    return(c(l, as.character(df$v)))
-  })
+    # Filter and select which vertices from v to add to L lists
+    v_df <- data.frame(
+      v = row.names(assign_matrix), list = best_match, pval = min_pvals)
+    v_df <- v_df[v_df$pval <= cutoff,]
+    L_adj <- lapply(1:length(L), function(i){
+      l <- L[[i]]
+      df <- v_df[v_df$list == i,]
+      return(c(l, as.character(df$v)))
+    })
+  }else{
+    L_adj <- L
+  }
 
   if(!collect){
     return(L_adj)
