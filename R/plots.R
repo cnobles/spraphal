@@ -40,7 +40,9 @@ plot_cluster <- function(v, G, ...){
     ...) +
     labs(
       title = paste0(
-        "p-value = ",
+        "Vertices : ", length(v),
+        "\nEdges : ", ecount(induced_subgraph(G, vids = v)),
+        "\np-value : ",
         format(enrich_edgeset(v, G), digits = 3, scientific = TRUE))) +
     theme(
       panel.background = element_rect(color = "grey"),
