@@ -180,7 +180,7 @@ alias_arbiter <- function(IDs, RefIDs, aliasIDs, outputIDs = NULL,
   # Check for ambiguous aliases
   ambi_alias <- table(unlist(aliasIDs))
   ambi_alias <- names(ambi_alias[ambi_alias > 1])
-  if(length(ambi_alias) > 0){
+  if(length(ambi_alias) > 0 & !quiet){
     message(
       "Ambiguous aliases removed : ", paste(ambi_alias, collapse = ", "), ".")
   }
