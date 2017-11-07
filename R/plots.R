@@ -181,7 +181,9 @@ plot_clusters <- function(Lc, G, set.v = "Set1", set.e = "grey50", ...){
     set.e.max <- brewer.pal.info$maxcolors[
       match(set.e, row.names(brewer.pal.info))]
     set.e.max <- ifelse(
-      set.e.max >= 3, min(c(set.e.max, length(unique(sGel$edge.type)))), 3)
+      length(unique(sGel$edge.type)) >= 3,
+      min(c(set.e.max, length(unique(sGel$edge.type)))),
+      3)
     edge_colors <- colorRampPalette(brewer.pal(set.e.max, set.e))(
       length(unique(sGel$edge.type)))
   }else{
@@ -192,7 +194,7 @@ plot_clusters <- function(Lc, G, set.v = "Set1", set.e = "grey50", ...){
   if(set.v %in% row.names(brewer.pal.info)){
     set.v.max <- brewer.pal.info$maxcolors[
       match(set.v, row.names(brewer.pal.info))]
-    set.v.max <- ifelse(set.v.max >= 3, min(c(set.v.max, length(Lc)-1)), 3)
+    set.v.max <- ifelse(length(Lc)-1 >= 3, min(c(set.v.max, length(Lc)-1)), 3)
     Lc_colors <- colorRampPalette(brewer.pal(set.v.max, set.v))(
       length(Lc)-1)
   }else{
