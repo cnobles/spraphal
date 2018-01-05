@@ -410,15 +410,15 @@ calc_enrichment <- function(v, G, d = 20, f = 100, e = NULL){
   lims <- seq(e, length(v), d)
   lims <- lims[lims >= e]
   denv <- new.env()
-  denv$enrich <- list()
-  denv$enrichExt <- list()
+  denv$enrich <- numeric()
+  denv$enrichExt <- numeric()
 
   null <- lapply(lims, function(i, v, G, d, f, e, denv){
     Gec <- ecount(G)
     b <- v[1:max(e, i-d)]
     s <- v[(i-d+1):i]
-    if(all(b == s)){
-      enrich <- list(calc_prob_edgeset(b, G))
+    if(all(s %in% b)){
+      enrich <- calc_prob_edgeset(b, G)
       enrichExt <- enrich
     }else{
       sG <- induced_subgraph(G, s)
@@ -430,7 +430,7 @@ calc_enrichment <- function(v, G, d = 20, f = 100, e = NULL){
         lambdaE <- lambdaB + lambdaS
         edgeCnt <- count_edges(G, s) + count_edges(G, s, b)
         maxEdgeCnt <- length(s)*(length(s)-1)/2 + length(s)*length(b)
-        enrich <- list(comp_sparse_prob(lambdaS, edgeCnt, maxEdgeCnt))
+        enrich <- comp_sparse_prob(lambdaS, edgeCnt, maxEdgeCnt)
 
         if(f > 0){
           a <- v[(i+1):min((i+f), length(v))]
@@ -440,7 +440,7 @@ calc_enrichment <- function(v, G, d = 20, f = 100, e = NULL){
           edgeCnt <- edgeCnt + count_edges(G, s, a)
           maxEdgeCnt <- maxEdgeCnt + length(s)*length(a)
         }
-        enrichExt <- list(comp_sparse_prob(lambdaE, edgeCnt, maxEdgeCnt))
+        enrichExt <- comp_sparse_prob(lambdaE, edgeCnt, maxEdgeCnt)
       }else{
         enrich <- NA
         enrichExt <- NA
