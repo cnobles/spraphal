@@ -249,3 +249,55 @@ plot_clusters <- function(Lc, G, set.v = "Set1", set.e = "grey50", ...){
       legend.title = element_text(size = 10),
       legend.text = element_text(size = 10))
 }
+
+#' Plot enrichment analysis of ordered verticies.
+#' 
+#' @param v vector of vertex identifiers. All vertex identifiers need to be
+#' present in the graph G.
+#' @param G igraph object of which v vertices are a part of and is considered
+#' the background for enrichment analysis.
+#' @param d delta distance between analysis points. Default 50.
+#' @param f forward distance for extended analysis. Default 100.
+#' @param e edge distance for which to consider, from the beginning. Default d.
+#' @param bLim bottom limit for significance value, positive log of p-value. ie.
+#' 10 -> minimum p-value of 10^-10 plotted.
+#' @param critVal critical value for which to consider significance. Default 
+#' 0.05.
+#' @param ... arguments to be passed into ggplot.
+#'
+#' @author Christopher Nobles, Ph.D.
+#' @export
+
+plot_enrichment_analysis <- function(v, G, d = 50, f = 100, e = NULL, 
+                                     bLim = 50, critVal = 0.05, ...){
+  # Required R-packages
+  packs <- c("spraphal", "ggplot2", "scales")
+  stopifnot(any(sapply(packs, require, character.only = TRUE)))
+  
+  # Calculate enrichment analysis
+  enrichData <- as.data.frame(calc_enrichment(v, G, d, f, e))
+  
+  # Transform data to plotting format
+  enrichData$pValue <- ifelse(
+    enrichData$enrichmentExt < 10^(-bLim),
+    rep(10^(-bLim), nrow(enrichData)), enrichData$enrichmentExt)
+  enrichData$pValue <- log(enrichData$pValue, base = 10)
+  
+  # Generate output plot object
+  ggplot(enrichData, aes(x = limits, y = pValue), ...) +
+    geom_line(color = "blue") + 
+    geom_point(size = 5, color = "white", fill = "white", shape = 21) +
+    geom_point(size = 3, color = "blue", fill = "white", shape = 21) + 
+    geom_hline(
+      yintercept = log(critVal), linetype = "dashed", color = "grey50") +
+    scale_y_continuous(
+      limits = c(min(enrichData$pValue), 1), 
+      breaks = pretty_breaks()) +
+    scale_x_continuous(breaks = enrichData$limits) +
+    labs(x = "Index", y = "log(p-value)") +
+    theme(
+      panel.grid = element_blank(),
+      panel.background = element_rect(fill = "white"),
+      axis.text = element_text(color = "black"),
+      axis.line = element_line(color = "black"))
+}
