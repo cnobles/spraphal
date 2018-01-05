@@ -2,7 +2,7 @@
 % Please edit documentation in R/statistics.R
 \name{comp_edgeset_prob}
 \alias{comp_edgeset_prob}
-\title{Compute edgeset probability}
+\title{Compute edgeset probability.}
 \usage{
 comp_edgeset_prob(el, G, maxEdgeCnt, elcols = c(1, 2), exact = TRUE)
 }
@@ -23,7 +23,7 @@ to 1 and 2.}
 calculated rather than approximated by `ppois()`.}
 }
 \description{
-Compute edgeset probability
+Compute edgeset probability.
 }
 \author{
 Christopher Nobles, Ph.D.

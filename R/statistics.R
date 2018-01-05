@@ -1,4 +1,4 @@
-#' Compute the probability of vertex i connecting to vertex j
+#' Compute the probability of vertex i connecting to vertex j.
 #'
 #' @param ki integer degree of vertex i
 #' @param kj integer degree of vertex j
@@ -15,7 +15,7 @@ comp_pij <- function(ki, kj, M, sparseOnly = TRUE){
   return(lij)
 }
 
-#' Compute the number of expected connections between a set of vertices
+#' Compute the number of expected connections between a set of vertices.
 #'
 #' @param el data.frame/matrix edgelist where column 1 and column 2 contain the
 #' lists of connected vertices of interest.
@@ -46,11 +46,15 @@ comp_lambda <- function(el, G, elcols = c(1,2)){
   ki <- igraph::degree(G, el[,elcols[1]])
   kj <- igraph::degree(G, el[,elcols[2]])
   M <- ecount(G)
-  l <- sum(mapply(comp_pij, ki = ki, kj = kj, MoreArgs = list(M = M)))
+  if(length(ki) > 0 & length(kj) > 0){
+    l <- sum(mapply(comp_pij, ki = ki, kj = kj, MoreArgs = list(M = M)))
+  }else{
+    l <- NA
+  }
   return(l)
 }
 
-#' Compute the number of expected connections between two sets of vertices
+#' Compute the number of expected connections between two sets of vertices.
 #'
 #' @param v1 vector of vertex identifiers for list 1.
 #' @param v2 vector of vertex identifiers for list 2.
@@ -98,12 +102,39 @@ comp_lambda_bipartite <- function(v1, v2, G){
     ki <- igraph::degree(G, sGel$vi)
     kj <- igraph::degree(G, sGel$vj)
     M <- ecount(G)
-    l <- sum(mapply(comp_pij, ki = ki, kj = kj, MoreArgs = list(M = M)))
+    if(length(ki) > 0 & length(kj) > 0){
+      l <- sum(mapply(comp_pij, ki = ki, kj = kj, MoreArgs = list(M = M)))
+    }else{
+      l <- NA
+    }
     return(l)
   }
 }
 
-#' Compute edgeset probability
+#' Comput probability for sparse graph edges.
+#'
+#' @param lambda
+#' @param edgeCnt
+#' @param maxEdgeCnt
+
+comp_sparse_prob <- function(lambda, edgeCnt, maxEdgeCnt, exact = TRUE){
+  if(exact){
+    alp <- exp(-lambda) * sum(sapply(0:maxEdgeCnt, function(h, lam){
+      exp( h * log(lam) - lfactorial(h))}, lam = lambda))
+    prb <- exp(-lambda) * sum(sapply(edgeCnt:maxEdgeCnt, function(h, lam){
+      exp( h * log(lam) - lfactorial(h))}, lam = lambda))
+  }else{
+    prb <- (
+      exp(ppois(maxEdgeCnt, lambda, log.p = TRUE)) -
+        exp(ppois(edgeCnt, lambda, log.p = TRUE))) /
+      (exp(ppois(maxEdgeCnt, lambda, log.p = TRUE)) -
+         exp(ppois(0, lambda, log.p = TRUE))
+      )
+  }
+  return(prb)
+}
+
+#' Compute edgeset probability.
 #'
 #' @param el data.frame/matrix edgelist where column 1 and column 2 contain the
 #' lists of connected vertices of interest.
@@ -155,7 +186,7 @@ comp_edgeset_prob <- function(el, G, maxEdgeCnt,
   return(prb)
 }
 
-#' Approximate the probability of observing an edge set
+#' Approximate the probability of observing an edge set.
 #'
 #' @param v vector of vertex identifiers. Vertices must be present in graph G.
 #' @param G igraph object representing the graph and including vertices from v.
@@ -163,7 +194,7 @@ comp_edgeset_prob <- function(el, G, maxEdgeCnt,
 #' @author Christopher Nobles, Ph.D.
 #' @export
 
-enrich_edgeset <- function(v, G){
+calc_prob_edgeset <- function(v, G){
   required <- c("igraph", "stats")
   stopifnot(all(sapply(
     required, require, character.only = TRUE, quietly = TRUE)))
@@ -192,7 +223,7 @@ enrich_edgeset <- function(v, G){
 }
 
 #' Approximate the probability of each vertex within a list belonging to the
-#' list
+#' list.
 #'
 #' @param v vector of vertex identifiers. Vertices must be present in graph G.
 #' @param G igraph object representing the graph and including vertices from v.
@@ -200,7 +231,7 @@ enrich_edgeset <- function(v, G){
 #' @author Christopher Nobles, Ph.D.
 #' @export
 
-enrich_vertex <- function(v, G){
+calc_prob_vertex <- function(v, G){
   required <- c("igraph", "stats")
   stopifnot(all(sapply(
     required, require, character.only = TRUE, quietly = TRUE)))
@@ -231,7 +262,7 @@ enrich_vertex <- function(v, G){
 }
 
 #' Approximate the probability of a vertex not within a list belonging to the
-#' list
+#' list.
 #'
 #' @param v1 vector of vertex identifiers. Vertices must be present in graph G.
 #' @param v2 vector of vertex identifiers not in `v1`. These vertices will be
@@ -242,7 +273,7 @@ enrich_vertex <- function(v, G){
 #' @author Christopher Nobles, Ph.D.
 #' @export
 
-enrich_outside_vertex <- function(v1, v2, G){
+calc_prob_outside_vertex <- function(v1, v2, G){
   required <- c("igraph", "stats")
   stopifnot(all(sapply(
     required, require, character.only = TRUE, quietly = TRUE)))
@@ -291,7 +322,7 @@ enrich_outside_vertex <- function(v1, v2, G){
 }
 
 #' Approximate the probability of interactions between two subgraphs, a
-#' bipartite comparison
+#' bipartite comparison.
 #'
 #' @param v1 vector of vertex identifiers, indicating the vertices present in
 #' subgraph 1. Vertex identifiers need to be the names of vertices in G. "v1"
@@ -304,7 +335,7 @@ enrich_outside_vertex <- function(v1, v2, G){
 #' @author Christopher Nobles, Ph.D.
 #' @export
 
-enrich_bipartite <- function(v1, v2, G){
+calc_prob_bipartite <- function(v1, v2, G){
   required <- c("igraph", "stats")
   stopifnot(all(sapply(
     required, require, character.only = TRUE, quietly = TRUE)))
@@ -359,3 +390,87 @@ enrich_bipartite <- function(v1, v2, G){
     }
   }
 }
+
+#' Calculate the enrichment within an ordered list of verticies.
+#'
+#' @param v vector of vertex identifiers. Vertices must be present in graph G.
+#' @param G igraph object representing the graph and including vertices from v.
+#' @param d delta or change distance for which to look for enrichment. Default
+#' 20.
+#' @param f forward threshold for reference enrichment. Default 100.
+#' @param e edge window to consider at the beginning. If not specified, the
+#' default value will be equal to the delta `d`.
+#'
+#' @author Christopher Nobles, Ph.D.
+#' @export
+
+calc_enrichment <- function(v, G, d = 20, f = 100, e = NULL){
+  stopifnot(all(v %in% V(G)$name))
+  if(is.null(e)) e <- d
+  lims <- seq(e, length(v), d)
+  lims <- lims[lims >= e]
+  denv <- new.env()
+  denv$enrich <- list()
+  denv$enrichExt <- list()
+
+  null <- lapply(lims, function(i, v, G, d, f, e, denv){
+    Gec <- ecount(G)
+    b <- v[1:max(e, i-d)]
+    s <- v[(i-d+1):i]
+    if(all(b == s)){
+      enrich <- list(calc_prob_edgeset(b, G))
+      enrichExt <- enrich
+    }else{
+      sG <- induced_subgraph(G, s)
+      if(ecount(sG) > 0){
+        lambdaS <- comp_lambda(as.data.frame(get.edgelist(sG)), G)
+        lambdaS <- ifelse(is.na(lambdaS), 0, lambdaS)
+        lambdaB <- comp_lambda_bipartite(s, b, G)
+        lambdaB <- ifelse(is.na(lambdaB), 0, lambdaB)
+        lambdaE <- lambdaB + lambdaS
+        edgeCnt <- count_edges(G, s) + count_edges(G, s, b)
+        maxEdgeCnt <- length(s)*(length(s)-1)/2 + length(s)*length(b)
+        enrich <- list(comp_sparse_prob(lambdaS, edgeCnt, maxEdgeCnt))
+
+        if(f > 0){
+          a <- v[(i+1):min((i+f), length(v))]
+          lambdaA <- comp_lambda_bipartite(s, a, G)
+          lambdaA <- ifelse(is.na(lambdaA), 0, lambdaA)
+          lambdaE <- lambdaE + lambdaA
+          edgeCnt <- edgeCnt + count_edges(G, s, a)
+          maxEdgeCnt <- maxEdgeCnt + length(s)*length(a)
+        }
+        enrichExt <- list(comp_sparse_prob(lambdaE, edgeCnt, maxEdgeCnt))
+      }else{
+        enrich <- NA
+        enrichExt <- NA
+      }
+    }
+    denv$enrich <- c(denv$enrich, enrich)
+    denv$enrichExt <- c(denv$enrichExt, enrichExt)
+  },
+  v = v, G = G, d = d, f = f, e = e, denv = denv)
+
+  return(list(
+    "limits" = lims,
+    "enrichment" = denv$enrich,
+    "enrichmentExt" = denv$enrichExt))
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

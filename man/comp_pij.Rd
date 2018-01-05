@@ -2,7 +2,7 @@
 % Please edit documentation in R/statistics.R
 \name{comp_pij}
 \alias{comp_pij}
-\title{Compute the probability of vertex i connecting to vertex j}
+\title{Compute the probability of vertex i connecting to vertex j.}
 \usage{
 comp_pij(ki, kj, M, sparseOnly = TRUE)
 }
@@ -14,7 +14,7 @@ comp_pij(ki, kj, M, sparseOnly = TRUE)
 \item{M}{integer size of graph G, the total number of edges within G.}
 }
 \description{
-Compute the probability of vertex i connecting to vertex j
+Compute the probability of vertex i connecting to vertex j.
 }
 \author{
 Christopher Nobles, Ph.D.

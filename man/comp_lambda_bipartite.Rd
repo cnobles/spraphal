@@ -2,7 +2,7 @@
 % Please edit documentation in R/statistics.R
 \name{comp_lambda_bipartite}
 \alias{comp_lambda_bipartite}
-\title{Compute the number of expected connections between two sets of vertices}
+\title{Compute the number of expected connections between two sets of vertices.}
 \usage{
 comp_lambda_bipartite(v1, v2, G)
 }
@@ -14,7 +14,7 @@ comp_lambda_bipartite(v1, v2, G)
 \item{G}{igraph of which vertices from v1 and v2 are present.}
 }
 \description{
-Compute the number of expected connections between two sets of vertices
+Compute the number of expected connections between two sets of vertices.
 }
 \author{
 Christopher Nobles, Ph.D.

@@ -2,7 +2,7 @@
 % Please edit documentation in R/statistics.R
 \name{comp_lambda}
 \alias{comp_lambda}
-\title{Compute the number of expected connections between a set of vertices}
+\title{Compute the number of expected connections between a set of vertices.}
 \usage{
 comp_lambda(el, G, elcols = c(1, 2))
 }
@@ -17,7 +17,7 @@ input data.frame or matrix (`el`) which contain the edge list data, defaults
 to 1 and 2.}
 }
 \description{
-Compute the number of expected connections between a set of vertices
+Compute the number of expected connections between a set of vertices.
 }
 \author{
 Christopher Nobles, Ph.D.
