@@ -330,7 +330,7 @@ comp_enrichment <- function(v, G, d = 20, f = 100, e = NULL, exact = TRUE){
     b <- v[1:max(e, i-d)]
     s <- v[(i-d+1):i]
     if(all(s %in% b)){
-      enrich <- calc_prob_edgeset(b, G)
+      enrich <- comp_edgeset_prob(b, G, exact)
       enrichExt <- enrich
     }else{
       sG <- induced_subgraph(G, s)
@@ -352,7 +352,7 @@ comp_enrichment <- function(v, G, d = 20, f = 100, e = NULL, exact = TRUE){
           edgeCnt <- edgeCnt + count_edges(G, s, a)
           maxEdgeCnt <- maxEdgeCnt + length(s)*length(a)
         }
-        enrichExt <- comp_sparse_prob(lambdaE, edgeCnt, maxEdgeCnt)
+        enrichExt <- comp_sparse_prob(lambdaE, edgeCnt, maxEdgeCnt, exact)
       }else{
         enrich <- NA
         enrichExt <- NA
