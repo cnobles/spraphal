@@ -298,7 +298,7 @@ plot_enrichment_analysis <- function(v, G, d = 50, f = 100, e = NULL,
     scale_y_continuous(
       limits = c(-bLim, 1), 
       breaks = pretty_breaks()) +
-    scale_x_continuous(breaks = enrichData$limits) +
+    scale_x_continuous(breaks = pretty_breaks()) +
     labs(x = "Index", y = "log(p-value)") +
     theme(
       panel.grid = element_blank(),
