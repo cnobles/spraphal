@@ -133,7 +133,7 @@ prune_by_enrich <- function(G, v, cutoff, collect = FALSE){
   }
 
   # Determine the probability of each vertex belonging to the list
-  p <- enrich_vertex(v, G)
+  p <- comp_vertex_prob(v, G)
   p <- p[!is.na(p)]
   p <- p[p <= cutoff]
   if(!collect){
@@ -183,7 +183,7 @@ append_by_enrich <- function(G, v1, v2, cutoff, collect = FALSE){
   }
 
   # Determine the probability of the vertex associating with the list
-  p <- enrich_outside_vertex(v1, v2, G)
+  p <- comp_outside_vertex_prob(v1, v2, G)
   p <- p[!is.na(p)]
   p <- p[p <= cutoff]
   if(!collect){
@@ -236,7 +236,7 @@ append_vertices_to_lists <- function(G, L, v, cutoff, collect = FALSE){
 
   # Construct matrix of potential assignment, cols -> L, rows -> v
   # Identify best match and associated pvalue
-  assign_matrix <- sapply(L, enrich_outside_vertex, v2 = v, G = G)
+  assign_matrix <- sapply(L, comp_outside_vertex_prob, v2 = v, G = G)
   # Errors out if the matrix is only NA
   na_rows <- sapply(1:nrow(assign_matrix), function(i){
     sum(as.integer(is.na(assign_matrix[i,])))}) == length(L)

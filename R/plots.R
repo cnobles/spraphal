@@ -289,7 +289,7 @@ plot_enrichment_analysis <- function(v, G, d = 50, f = 100, e = NULL,
   enrichData$pValue <- log(enrichData$pValue, base = 10)
   
   # Generate output plot object
-  ggplot(enrichData, aes(x = limits, y = pValue)) +
+  ggplot(enrichData, aes(x = limits, y = pValue), ...) +
     geom_line(color = "blue") + 
     geom_point(size = 5, color = "white", fill = "white", shape = 21) +
     geom_point(size = 3, color = "blue", fill = "white", shape = 21) + 

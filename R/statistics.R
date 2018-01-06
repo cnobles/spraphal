@@ -93,8 +93,8 @@ comp_lambda_bipartite <- function(v1, v2, G){
     sGelb <- sGel[sGel$vi_ori != sGel$vj_ori,]
 
     # Compute lambda from edge list
-    ki <- igraph::degree(G, sGel$vi)
-    kj <- igraph::degree(G, sGel$vj)
+    ki <- igraph::degree(G, sGelb$vi)
+    kj <- igraph::degree(G, sGelb$vj)
     M <- ecount(G)
     if(length(ki) > 0 & length(kj) > 0){
       lam <- sum(
@@ -185,7 +185,7 @@ comp_vertex_prob <- function(v, G, exact = TRUE){
     lam <- comp_lambda_bipartite(vq, vset, G)
     M <- length(vset) # Since vq has already been removed)
     comp_sparse_prob(lam, zb, M, exact)
-  }, vset = v, el = sGel, G = G, exact)
+  }, vset = v, G = G, exact = exact)
 }
 
 #' Approximate the probability of a vertex not within a list belonging to the
