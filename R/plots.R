@@ -271,7 +271,7 @@ plot_clusters <- function(Lc, G, set.v = "Set1", set.e = "grey50", ...){
 #' @export
 
 plot_enrichment_analysis <- function(v, G, d = 50, f = 100, e = NULL, 
-                                     bLim = 50, critVal = 0.05, exact = TRUE, 
+                                     bLim = 10, critVal = 0.05, exact = TRUE, 
                                      ...){
   # Required R-packages
   packs <- c("spraphal", "ggplot2", "scales")
@@ -289,14 +289,14 @@ plot_enrichment_analysis <- function(v, G, d = 50, f = 100, e = NULL,
   enrichData$pValue <- log(enrichData$pValue, base = 10)
   
   # Generate output plot object
-  ggplot(enrichData, aes(x = limits, y = pValue), ...) +
+  ggplot(enrichData, aes(x = limits, y = pValue)) +
     geom_line(color = "blue") + 
     geom_point(size = 5, color = "white", fill = "white", shape = 21) +
     geom_point(size = 3, color = "blue", fill = "white", shape = 21) + 
     geom_hline(
       yintercept = log(critVal), linetype = "dashed", color = "grey50") +
     scale_y_continuous(
-      limits = c(min(enrichData$pValue), 1), 
+      limits = c(-bLim, 1), 
       breaks = pretty_breaks()) +
     scale_x_continuous(breaks = enrichData$limits) +
     labs(x = "Index", y = "log(p-value)") +
