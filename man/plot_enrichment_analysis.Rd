@@ -4,8 +4,8 @@
 \alias{plot_enrichment_analysis}
 \title{Plot enrichment analysis of ordered verticies.}
 \usage{
-plot_enrichment_analysis(v, G, d = 50, f = 100, e = NULL, bLim = 50,
-  critVal = 0.05, ...)
+plot_enrichment_analysis(v, G, d = 50, f = 100, e = NULL, bLim = 10,
+  critVal = 0.05, exact = TRUE, ...)
 }
 \arguments{
 \item{v}{vector of vertex identifiers. All vertex identifiers need to be
@@ -24,7 +24,9 @@ the background for enrichment analysis.}
 10 -> minimum p-value of 10^-10 plotted.}
 
 \item{critVal}{critical value for which to consider significance. Default 
-0.05.}
+0.05.
+#' @param exact logical. If TRUE, the approximation of the probability is
+calculated rather than approximated by `ppois()`.}
 
 \item{...}{arguments to be passed into ggplot.}
 }

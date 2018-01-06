@@ -4,7 +4,7 @@
 \alias{comp_enrichment}
 \title{Calculate the enrichment within an ordered list of verticies.}
 \usage{
-comp_enrichment(v, G, d = 20, f = 100, e = NULL, exact = TRUE)
+comp_enrichment(v, G, d = 50, f = 100, e = NULL, exact = TRUE)
 }
 \arguments{
 \item{v}{vector of vertex identifiers. Vertices must be present in graph G.}
