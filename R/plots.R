@@ -25,7 +25,7 @@ plot_subgraph <- function(v, G, ...){
 #' @export
 
 plot_cluster <- function(v, G, ...){
-  probs <- enrich_vertex(v, G)
+  probs <- comp_vertex_prob(v, G)
   prob.lvls <- c(1, 0.05, 0.01, 0.001, 0)
   probs.cut <- cut(probs, prob.lvls)
   levels(probs.cut) <- c("< 0.001", "< 0.01", "< 0.05", "< 1.0")
@@ -43,7 +43,7 @@ plot_cluster <- function(v, G, ...){
         "Vertices : ", length(v),
         "\nEdges : ", ecount(induced_subgraph(G, vids = v)),
         "\np-value : ",
-        format(enrich_edgeset(v, G), digits = 3, scientific = TRUE))) +
+        format(comp_edgeset_prob(v, G), digits = 3, scientific = TRUE))) +
     theme(
       panel.background = element_rect(color = "grey"),
       legend.title = element_text(size = 10),
@@ -92,7 +92,7 @@ plot_bipartite <- function(v1, v2, G, ..., quiet = FALSE){
                         " B = ", ecount(induced_subgraph(G, v2)), "\n",
                         "Bipartite edges: ", nrow(sGel), "\n",
                         "Interaction p-value: ", format(
-                          enrich_bipartite(v1, v2, G), digits = 3,
+                          comp_bipartite_prob(v1, v2, G), digits = 3,
                           scientific = TRUE))) +
     theme(
       panel.background = element_rect(color = "grey"),
@@ -275,7 +275,7 @@ plot_enrichment_analysis <- function(v, G, d = 50, f = 100, e = NULL,
   stopifnot(any(sapply(packs, require, character.only = TRUE)))
   
   # Calculate enrichment analysis
-  enrichData <- as.data.frame(calc_enrichment(v, G, d, f, e))
+  enrichData <- as.data.frame(comp_enrichment(v, G, d, f, e))
   
   # Transform data to plotting format
   enrichData$pValue <- ifelse(

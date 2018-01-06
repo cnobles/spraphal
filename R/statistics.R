@@ -316,7 +316,7 @@ comp_bipartite_prob <- function(v1, v2, G, exact = TRUE){
 #' @author Christopher Nobles, Ph.D.
 #' @export
 
-calc_enrichment <- function(v, G, d = 20, f = 100, e = NULL, exact = TRUE){
+comp_enrichment <- function(v, G, d = 20, f = 100, e = NULL, exact = TRUE){
   stopifnot(all(v %in% V(G)$name))
   if(is.null(e)) e <- d
   lims <- seq(e, length(v), d)
