@@ -17,41 +17,35 @@ comp_pij <- function(ki, kj, M, sparseOnly = TRUE){
 
 #' Compute the number of expected connections between a set of vertices.
 #'
-#' @param el data.frame/matrix edgelist where column 1 and column 2 contain the
-#' lists of connected vertices of interest.
-#' @param G igraph graph of which vertices from `el` are present.
-#' @param elcols numeric vector of length 2, indicating the two columns of the
-#' input data.frame or matrix (`el`) which contain the edge list data, defaults
-#' to 1 and 2.
+#' @param v vector of verticies present in graph G.
+#' @param G igraph object.
 #'
 #' @author Christopher Nobles, Ph.D.
 #' @export
 
-comp_lambda <- function(el, G, elcols = c(1,2)){
+# Change comp_lambda to depend on verticies, then change method to compute probability based on all combinations of degrees (combn(..., simplify = FALSE)). These changes will need to permiate through to other computations of lambda (bipartite, ...) through bipartite will be only combinations between groups, not within groups. This method is supported by the STRINGdb as well as the Itzkovitz 2003 paper, but may be interpreted differently from the Pradines paper. Need to read more carefully.
+# 
+comp_lambda <- function(v, G){
   # Check inputs
-  stopifnot(class(el) %in% c("data.frame", "matrix"))
   stopifnot(class(G) == "igraph")
-  stopifnot(
-    all(c(is.numeric(elcols), length(elcols) == 2, max(elcols) <= ncol(el))))
 
   # Check for vertices in graph G
-  vu <- unique(c(as.character(el[,elcols[1]]), as.character(el[,elcols[2]])))
-  vo <- vu[!vu %in% V(G)$name]
+  vo <- v[!v %in% V(G)$name]
   if(length(vo) > 0){
     message("Vertices not present in graph: ", paste(vo, collapse = ", "), ".")
-    el <- el[el[,!elcols[1]] %in% vo | !el[,elcols[2]] %in% vo,]
+    v <- v[v %in% G]
   }
 
-  # Compute lambda from edge list
-  ki <- igraph::degree(G, el[,elcols[1]])
-  kj <- igraph::degree(G, el[,elcols[2]])
+  # Compute lambda
+  deg <- igraph::degree(G, v)
   M <- ecount(G)
-  if(length(ki) > 0 & length(kj) > 0){
-    l <- sum(mapply(comp_pij, ki = ki, kj = kj, MoreArgs = list(M = M)))
+  if(length(deg) > 0){
+    lam <- sum(sapply(combn(deg, 2, simplify = FALSE), function(k, M){
+      comp_pij(k[1], k[2], M)}, M = M))
   }else{
-    l <- NA
+    lam <- NA
   }
-  return(l)
+  return(lam)
 }
 
 #' Compute the number of expected connections between two sets of vertices.
@@ -87,7 +81,7 @@ comp_lambda_bipartite <- function(v1, v2, G){
   }
 
   if(any(sapply(list(v1, v2), length) == 0)){
-    return(NA)
+    lam <- NA
   }else{
     # Isolate bipartite edges
     vu <- unique(c(v1, v2))
@@ -103,19 +97,26 @@ comp_lambda_bipartite <- function(v1, v2, G){
     kj <- igraph::degree(G, sGel$vj)
     M <- ecount(G)
     if(length(ki) > 0 & length(kj) > 0){
-      l <- sum(mapply(comp_pij, ki = ki, kj = kj, MoreArgs = list(M = M)))
+      lam <- sum(
+        sapply(ki, function(ki, M){
+          sapply(kj, function(kj){
+            comp_pij(ki, kj, M)})}, M = M))
     }else{
-      l <- NA
+      lam <- NA
     }
-    return(l)
+    return(lam)
   }
 }
 
-#' Comput probability for sparse graph edges.
+#' Compute probability for sparse graph edges.
 #'
-#' @param lambda
-#' @param edgeCnt
-#' @param maxEdgeCnt
+#' @param lambda expected connections between verticies, computed by 
+#' `comp_lambda` or `comp_lambda_bipartite`.
+#' @param edgeCnt count of edges present between the verticies tested.
+#' @param maxEdgeCnt maximal count of edges possible in graph or subgraph.
+#'
+#' @author Christopher Nobles, Ph.D.
+#' @export
 
 comp_sparse_prob <- function(lambda, edgeCnt, maxEdgeCnt, exact = TRUE){
   if(exact){
@@ -136,90 +137,26 @@ comp_sparse_prob <- function(lambda, edgeCnt, maxEdgeCnt, exact = TRUE){
 
 #' Compute edgeset probability.
 #'
-#' @param el data.frame/matrix edgelist where column 1 and column 2 contain the
-#' lists of connected vertices of interest.
-#' @param G igraph graph of which vertices from `el` are present.
+#' @param v vector of vertex identifiers. Vertices must be present in graph G.
+#' @param G igraph object representing the graph and including vertices from v.
 #' @param maxEdgeCnt numeric maximum number of edges that could be obsersered
 #' given vertices within edgelist.
-#' @param elcols numeric vector of length 2, indicating the two columns of the
-#' input data.frame or matrix (`el`) which contain the edge list data, defaults
-#' to 1 and 2.
 #' @param exact logical. If TRUE, the approximation of the probability is
 #' calculated rather than approximated by `ppois()`.
 #'
 #' @author Christopher Nobles, Ph.D.
 #' @export
 
-comp_edgeset_prob <- function(el, G, maxEdgeCnt,
-                              elcols = c(1,2), exact = TRUE){
+comp_edgeset_prob <- function(v, G, exact = TRUE){
   # Check inputs
-  stopifnot(class(el) %in% c("data.frame", "matrix"))
   stopifnot(class(G) == "igraph")
-  stopifnot(
-    all(c(is.numeric(elcols), length(elcols) == 2, max(elcols) <= ncol(el))))
-
-  # Check for vertices in graph G
-  vu <- unique(c(as.character(el[,elcols[1]]), as.character(el[,elcols[2]])))
-  vo <- vu[!vu %in% V(G)$name]
-  if(length(vo) > 0){
-    message("Vertices not present in graph: ", paste(vo, collapse = ", "), ".")
-    el <- el[el[,!elcols[1]] %in% vo | !el[,elcols[2]] %in% vo,]
-  }
+  v <- unique(v)
 
   # Calculate lamda, alpha, and approximate the probability of the edge set
-  vu <- unique(c(as.character(el[,elcols[1]]), as.character(el[,elcols[2]])))
-  lam <- comp_lambda(el, G, elcols = elcols)
-
-  if(exact){
-    alp <- exp(-lam) * sum(sapply(0:maxEdgeCnt, function(h, lam){
-      exp( h * log(lam) - lfactorial(h))}, lam = lam))
-    prb <- exp(-lam) * sum(sapply(nrow(el):maxEdgeCnt, function(h, lam){
-      exp( h * log(lam) - lfactorial(h))}, lam = lam))
-  }else{
-    prb <- (
-      exp(ppois(maxEdgeCnt, lam, log.p = TRUE)) -
-        exp(ppois(nrow(el), lam, log.p = TRUE))) /
-      (exp(ppois(maxEdgeCnt, lam, log.p = TRUE)) -
-         exp(ppois(0, lam, log.p = TRUE))
-      )
-  }
-  return(prb)
-}
-
-#' Approximate the probability of observing an edge set.
-#'
-#' @param v vector of vertex identifiers. Vertices must be present in graph G.
-#' @param G igraph object representing the graph and including vertices from v.
-#'
-#' @author Christopher Nobles, Ph.D.
-#' @export
-
-calc_prob_edgeset <- function(v, G){
-  required <- c("igraph", "stats")
-  stopifnot(all(sapply(
-    required, require, character.only = TRUE, quietly = TRUE)))
-
-  # Check for vertices in graph
-  vo <- v[!v %in% names(as.list(V(G)))]
-  if(length(vo) > 0){
-    message("Vertices not present in graph: ", paste(vo, collapse = ", "), ".")
-    v <- v[!v %in% vo]
-  }
-
-  # Extract subgraph from G containing all vertices supplied
-  sG <- induced_subgraph(G, vids = v)
-
-  # Extract edgelist
-  sGel <- as.data.frame(get.edgelist(sG))
-  names(sGel) <- c("vi", "vj")
-
-  if(nrow(sGel) == 0){
-    return(NA)
-  }else{
-    prob <- comp_edgeset_prob(
-      el = sGel, G = G, maxEdgeCnt = ((length(v) * (length(v) - 1)) / 2))
-    return(prob)
-  }
+  lam <- comp_lambda(v, G)
+  z <- ecount(induced_subgraph(G, v))
+  M <- length(v)*(length(v)-1)/2
+  comp_sparse_prob(lam, z, M, exact)
 }
 
 #' Approximate the probability of each vertex within a list belonging to the
@@ -227,15 +164,13 @@ calc_prob_edgeset <- function(v, G){
 #'
 #' @param v vector of vertex identifiers. Vertices must be present in graph G.
 #' @param G igraph object representing the graph and including vertices from v.
+#' @param exact logical. If TRUE, the approximation of the probability is
+#' calculated rather than approximated by `ppois()`.
 #'
 #' @author Christopher Nobles, Ph.D.
 #' @export
 
-calc_prob_vertex <- function(v, G){
-  required <- c("igraph", "stats")
-  stopifnot(all(sapply(
-    required, require, character.only = TRUE, quietly = TRUE)))
-
+comp_vertex_prob <- function(v, G, exact = TRUE){
   # Check for vertices in graph
   vo <- v[!v %in% V(G)$name]
   if(length(vo) > 0){
@@ -243,22 +178,14 @@ calc_prob_vertex <- function(v, G){
     v <- v[!v %in% vo]
   }
 
-  # Extract subgraph and set up edge list
-  sG <- induced_subgraph(G, vids = v)
-  sGel <- as.data.frame(get.edgelist(sG))
-  names(sGel) <- c("vi", "vj")
-
-  sapply(v, function(vq, vset, el, G){
-    # Identify edges only associated with vertex vq
-    el <- el[el$vi == vq | el$vj == vq,]
-    if(nrow(el) == 0){
-      return(NA)
-    }else{
-      prob <- comp_edgeset_prob(
-        el = el, G = G, maxEdgeCnt = (length(vset) - 1))
-      return(prob)
-    }
-  }, vset = v, el = sGel, G = G)
+  sapply(v, function(vq, vset, G, exact){
+    zb <- as.data.frame(get.edgelist(induced_subgraph(G, vset)))
+    zb <- nrow(zb[zb[,1] == vq | zb[,2] == vq,])
+    vset <- vset[vset != vq]
+    lam <- comp_lambda_bipartite(vq, vset, G)
+    M <- length(vset) # Since vq has already been removed)
+    comp_sparse_prob(lam, zb, M, exact)
+  }, vset = v, el = sGel, G = G, exact)
 }
 
 #' Approximate the probability of a vertex not within a list belonging to the
@@ -269,15 +196,13 @@ calc_prob_vertex <- function(v, G){
 #' tested as a vertex in `v1`.
 #' @param G igraph object representing the graph and including vertices from
 #' `v1` and `v2`.
+#' @param exact logical. If TRUE, the approximation of the probability is
+#' calculated rather than approximated by `ppois()`.
 #'
 #' @author Christopher Nobles, Ph.D.
 #' @export
 
-calc_prob_outside_vertex <- function(v1, v2, G){
-  required <- c("igraph", "stats")
-  stopifnot(all(sapply(
-    required, require, character.only = TRUE, quietly = TRUE)))
-
+comp_outside_vertex_prob <- function(v1, v2, G, exact = TRUE){
   # All vertices in v1 and v2 must be present in graph G
   vu <- unique(c(v1, v2))
   vo <- vu[!vu %in% names(as.list(V(G)))]
@@ -302,22 +227,13 @@ calc_prob_outside_vertex <- function(v1, v2, G){
   if(length(v1) == 0 | length(v2) == 0){
     return(NA)
   }else{
-    return(sapply(v2, function(vq, vset, G){
-      # Identify edges with new vertex
-      el <- as.data.frame(as_edgelist(induced_subgraph(G, c(vset, vq))))
-      names(el) <- c("vi", "vj")
-      el$vi_ori <- ifelse(el$vi == vq, "q", "set")
-      el$vj_ori <- ifelse(el$vj == vq, "q", "set")
-      el <- el[el$vi_ori != el$vj_ori,]
-
-      # Compute probability
-      if(nrow(el) == 0){
-        return(NA)
-      }else{
-        prob <- comp_edgeset_prob(el, G, length(vset))
-        return(prob)
-      }
-    }, vset = v1, G = G))
+    return(sapply(v2, function(vq, vset, G, exact){
+      zb <- as.data.frame(get.edgelist(induced_subgraph(G, c(vset, vq))))
+      zb <- nrow(zb[zb[,1] == vq | zb[,2] == vq,])
+      lam <- comp_lambda_bipartite(vq, vset, G)
+      M <- length(vset)
+      comp_sparse_prob(lam, zb, M, exact)
+    }, vset = v1, G = G, exact = exact))
   }
 }
 
@@ -331,15 +247,13 @@ calc_prob_outside_vertex <- function(v1, v2, G){
 #' comparison should not have zero intersection. Vertices in both L1 and L2 will
 #' be removed during analysis. "v2" vertices will be used to create g2 subgraph.
 #' @param G igraph object of which g1 and g2 subgraphs will be created from.
+#' @param exact logical. If TRUE, the approximation of the probability is
+#' calculated rather than approximated by `ppois()`.
 #'
 #' @author Christopher Nobles, Ph.D.
 #' @export
 
-calc_prob_bipartite <- function(v1, v2, G){
-  required <- c("igraph", "stats")
-  stopifnot(all(sapply(
-    required, require, character.only = TRUE, quietly = TRUE)))
-
+comp_bipartite_prob <- function(v1, v2, G, exact = TRUE){
   # All vertices in v1 and v2 must be present in graph G
   vu <- unique(c(v1, v2))
   v_not_present <- vu[!vu %in% names(as.list(V(G)))]
@@ -364,27 +278,23 @@ calc_prob_bipartite <- function(v1, v2, G){
   }
 
   if(length(v1) == 0 | length(v2) == 0){
-    return(1)
+    return(NA)
   }else{
-    # Extract subgraph from G containing all vertices from lists
+    lam <- comp_lambda_bipartite(v1, v2, G)
+
+    # Determine bipartite edges by analyzing subgraph and edgelist
     vu <- unique(c(v1, v2))
     sG <- induced_subgraph(G, vu)
-
-    # Extract edgelist and filter for bipartite edges
     sGel <- as.data.frame(get.edgelist(sG))
     names(sGel) <- c("vi", "vj")
     sGel$vi_ori <- ifelse(sGel$vi %in% v1, "v1", "v2")
     sGel$vj_ori <- ifelse(sGel$vj %in% v1, "v1", "v2")
     sGelb <- sGel[sGel$vi_ori != sGel$vj_ori,]
-    v1 <- unique(
-      c(sGelb$vi[sGelb$vi_ori == "v1"], sGelb$vj[sGelb$vj_ori == "v1"]))
-    v2 <- unique(
-      c(sGelb$vi[sGelb$vi_ori == "v2"], sGelb$vj[sGelb$vj_ori == "v2"]))
+    zb <- nrow(sGelb)
+    M <- length(unique(v1)) * length(unique(v2))
 
-    if(nrow(sGelb) > 0){
-      prob <- comp_edgeset_prob(
-        el = sGelb, G = G, maxEdgeCnt = (length(v1) * length(v2)))
-      return(prob)
+    if(zb > 0){
+      return(comp_sparse_prob(lam, zb, M, exact))
     }else{
       return(NA)
     }
@@ -400,11 +310,13 @@ calc_prob_bipartite <- function(v1, v2, G){
 #' @param f forward threshold for reference enrichment. Default 100.
 #' @param e edge window to consider at the beginning. If not specified, the
 #' default value will be equal to the delta `d`.
+#' @param exact logical. If TRUE, the approximation of the probability is
+#' calculated rather than approximated by `ppois()`.
 #'
 #' @author Christopher Nobles, Ph.D.
 #' @export
 
-calc_enrichment <- function(v, G, d = 20, f = 100, e = NULL){
+calc_enrichment <- function(v, G, d = 20, f = 100, e = NULL, exact = TRUE){
   stopifnot(all(v %in% V(G)$name))
   if(is.null(e)) e <- d
   lims <- seq(e, length(v), d)
@@ -413,7 +325,7 @@ calc_enrichment <- function(v, G, d = 20, f = 100, e = NULL){
   denv$enrich <- numeric()
   denv$enrichExt <- numeric()
 
-  null <- lapply(lims, function(i, v, G, d, f, e, denv){
+  null <- lapply(lims, function(i, v, G, d, f, e, denv, exact){
     Gec <- ecount(G)
     b <- v[1:max(e, i-d)]
     s <- v[(i-d+1):i]
@@ -430,7 +342,7 @@ calc_enrichment <- function(v, G, d = 20, f = 100, e = NULL){
         lambdaE <- lambdaB + lambdaS
         edgeCnt <- count_edges(G, s) + count_edges(G, s, b)
         maxEdgeCnt <- length(s)*(length(s)-1)/2 + length(s)*length(b)
-        enrich <- comp_sparse_prob(lambdaS, edgeCnt, maxEdgeCnt)
+        enrich <- comp_sparse_prob(lambdaS, edgeCnt, maxEdgeCnt, exact)
 
         if(f > 0){
           a <- v[(i+1):min((i+f), length(v))]
@@ -449,28 +361,10 @@ calc_enrichment <- function(v, G, d = 20, f = 100, e = NULL){
     denv$enrich <- c(denv$enrich, enrich)
     denv$enrichExt <- c(denv$enrichExt, enrichExt)
   },
-  v = v, G = G, d = d, f = f, e = e, denv = denv)
+  v = v, G = G, d = d, f = f, e = e, denv = denv, exact = exact)
 
   return(list(
     "limits" = lims,
     "enrichment" = denv$enrich,
     "enrichmentExt" = denv$enrichExt))
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

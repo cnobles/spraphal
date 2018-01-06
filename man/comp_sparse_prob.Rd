@@ -2,10 +2,21 @@
 % Please edit documentation in R/statistics.R
 \name{comp_sparse_prob}
 \alias{comp_sparse_prob}
-\title{Comput probability for sparse graph edges.}
+\title{Compute probability for sparse graph edges.}
 \usage{
 comp_sparse_prob(lambda, edgeCnt, maxEdgeCnt, exact = TRUE)
 }
+\arguments{
+\item{lambda}{expected connections between verticies, computed by 
+`comp_lambda` or `comp_lambda_bipartite`.}
+
+\item{edgeCnt}{count of edges present between the verticies tested.}
+
+\item{maxEdgeCnt}{maximal count of edges possible in graph or subgraph.}
+}
 \description{
-Comput probability for sparse graph edges.
+Compute probability for sparse graph edges.
+}
+\author{
+Christopher Nobles, Ph.D.
 }

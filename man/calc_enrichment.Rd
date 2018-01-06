@@ -4,7 +4,7 @@
 \alias{calc_enrichment}
 \title{Calculate the enrichment within an ordered list of verticies.}
 \usage{
-calc_enrichment(v, G, d = 20, f = 100, e = NULL)
+calc_enrichment(v, G, d = 20, f = 100, e = NULL, exact = TRUE)
 }
 \arguments{
 \item{v}{vector of vertex identifiers. Vertices must be present in graph G.}
@@ -18,6 +18,9 @@ calc_enrichment(v, G, d = 20, f = 100, e = NULL)
 
 \item{e}{edge window to consider at the beginning. If not specified, the
 default value will be equal to the delta `d`.}
+
+\item{exact}{logical. If TRUE, the approximation of the probability is
+calculated rather than approximated by `ppois()`.}
 }
 \description{
 Calculate the enrichment within an ordered list of verticies.

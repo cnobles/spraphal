@@ -27,3 +27,6 @@ the names of `adjusted_lists` and `remaining_vertices`.}
 \description{
 Append vertices in a list to vertex lists depending on enrichment
 }
+\author{
+Christopher Nobles, Ph.D.
+}

@@ -154,6 +154,7 @@ prune_by_enrich <- function(G, v, cutoff, collect = FALSE){
 #' vertices from `v2` to `v1` the list.
 #' @param collect logical. If TRUE, the output will contain a listed object with
 #' the names of `adjusted_list` and `remaining_vertices`.
+#'
 #' @author Christopher Nobles, Ph.D.
 #' @export
 
@@ -208,6 +209,9 @@ append_by_enrich <- function(G, v1, v2, cutoff, collect = FALSE){
 #' vertices from `v` to vectors in `L`.
 #' @param collect logical. If TRUE, the output will contain a listed object with
 #' the names of `adjusted_lists` and `remaining_vertices`.
+#'
+#' @author Christopher Nobles, Ph.D.
+#' @export
 
 append_vertices_to_lists <- function(G, L, v, cutoff, collect = FALSE){
   stopifnot(require("igraph"))
