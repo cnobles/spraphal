@@ -263,19 +263,24 @@ plot_clusters <- function(Lc, G, set.v = "Set1", set.e = "grey50", ...){
 #' 10 -> minimum p-value of 10^-10 plotted.
 #' @param critVal critical value for which to consider significance. Default 
 #' 0.05.
+#' #' @param exact logical. If TRUE, the approximation of the probability is
+#' calculated rather than approximated by `ppois()`.
 #' @param ... arguments to be passed into ggplot.
 #'
 #' @author Christopher Nobles, Ph.D.
 #' @export
 
 plot_enrichment_analysis <- function(v, G, d = 50, f = 100, e = NULL, 
-                                     bLim = 50, critVal = 0.05, ...){
+                                     bLim = 50, critVal = 0.05, exact = TRUE, 
+                                     ...){
   # Required R-packages
   packs <- c("spraphal", "ggplot2", "scales")
   stopifnot(any(sapply(packs, require, character.only = TRUE)))
   
   # Calculate enrichment analysis
   enrichData <- as.data.frame(comp_enrichment(v, G, d, f, e))
+  enrichData$enrichmentExt <- ifelse(
+    is.na(enrichData$enrichmentExt), 1, enrichData$enrichmentExt)
   
   # Transform data to plotting format
   enrichData$pValue <- ifelse(

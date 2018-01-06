@@ -316,7 +316,7 @@ comp_bipartite_prob <- function(v1, v2, G, exact = TRUE){
 #' @author Christopher Nobles, Ph.D.
 #' @export
 
-comp_enrichment <- function(v, G, d = 20, f = 100, e = NULL, exact = TRUE){
+comp_enrichment <- function(v, G, d = 50, f = 100, e = NULL, exact = TRUE){
   stopifnot(all(v %in% V(G)$name))
   if(is.null(e)) e <- d
   lims <- seq(e, length(v), d)
@@ -335,7 +335,7 @@ comp_enrichment <- function(v, G, d = 20, f = 100, e = NULL, exact = TRUE){
     }else{
       sG <- induced_subgraph(G, s)
       if(ecount(sG) > 0){
-        lambdaS <- comp_lambda(as.data.frame(get.edgelist(sG)), G)
+        lambdaS <- comp_lambda(s, G)
         lambdaS <- ifelse(is.na(lambdaS), 0, lambdaS)
         lambdaB <- comp_lambda_bipartite(s, b, G)
         lambdaB <- ifelse(is.na(lambdaB), 0, lambdaB)
