@@ -5,6 +5,7 @@
 \title{Assign consistant ID to variable given various alias IDs from a reference.}
 \usage{
 alias_arbiter(IDs, RefIDs, aliasIDs)
+  
   alias_arbiter(
     IDs, RefIDs, aliasIDs, outputIDs, sep = NULL,
     remove_absent_IDs = FALSE, quiet = FALSE)
@@ -40,8 +41,8 @@ more reference IDs.}
 Assign a reference ID to a vector of IDs that may have alias
 values. An example, if ID values of "A", "B", "C" were given to three
 bacterial species, but "B" was later reclassified as "C", then "B" becomes
-a depreciated alias of "C". This function would take this information and
-change the original vector of "A", "B", and "C", to "A", "C", and "C".
+a depreciated alias of "C". This function takes this information and
+changes the original vector of "A", "B", and "C", to "A", "C", and "C".
 Aliases can be supplied as a list of character or numeric vectors or as a
 character vector to split on the `sep` value. IDs need to match RefIDs, but
 outputIDs can be another ID type, as long as they are indexed in the same
@@ -54,7 +55,7 @@ is not the same length as the input if there are any unmatched or ambiguous
 IDs. The other option is `NULL` to be supplied, which fills the `NA` values
 with their original input, even if the alias was ambiguous.
 
-This function created a directed graph where all reference IDs are source
+This function creates a directed graph where all reference IDs are source
 nodes and all aliases are children from that source node. Alias IDs are
 screened for reference IDs and ambiguous IDs first, therefore ensuring the
 graph is a collection of small subgraphs with single sources and multiple
