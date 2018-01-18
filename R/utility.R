@@ -187,7 +187,7 @@ alias_arbiter <- function(IDs, RefIDs, aliasIDs, outputIDs = NULL,
 
   # Remove RefIDs and ambiguous aliases from aliasIDs
   aliasIDs <- lapply(1:length(aliasIDs), function(i){
-    aliasIDs[[i]][!aliasIDs[[i]] %in% c(RefIDs[i], ambi_alias)]
+    aliasIDs[[i]][!aliasIDs[[i]] %in% c(RefIDs[i], ambi_alias, "")]
   })
 
   # Create graph of aliases and reference IDs
