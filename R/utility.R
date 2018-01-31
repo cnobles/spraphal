@@ -163,7 +163,8 @@ map_names <- function(data, names = "gene_name",
 alias_arbiter <- function(IDs, RefIDs, aliasIDs, outputIDs = NULL,
                           sep = NULL, remove_absent_IDs = FALSE, quiet = FALSE){
   # Require packages
-  stopifnot(require("igraph"))
+  packs <- c("igraph")
+  stopifnot(suppressMessages(sapply(packs, require, character.only = TRUE)))
 
   # Check inputs and assign defaults
   stopifnot(any(IDs %in% RefIDs))
@@ -184,9 +185,12 @@ alias_arbiter <- function(IDs, RefIDs, aliasIDs, outputIDs = NULL,
     alias = unlist(aliasIDs),
     stringsAsFactors = FALSE)
   aliasID_df <- aliasID_df[aliasID_df$ref != aliasID_df$alias,]
+  aliasID_df <- aliasID_df[!aliasID_df$alias %in% RefIDs,]
+  aliasID_df <- aliasID_df[aliasID_df$alias != "",]
   aliasID_df <- aggregate(alias ~ ref, data = aliasID_df, function(x){
-    paste(x[!x %in% RefIDs], collapse = sep)})
-  aliasIDs <- strsplit(aliasID_df$alias, sep)
+    paste(x, collapse = sep)})
+
+  aliasIDs <- strsplit(aliasID_df$alias, sep, fixed = TRUE)
   names(aliasIDs) <- aliasID_df$ref
   
   # Check for ambiguous aliases
