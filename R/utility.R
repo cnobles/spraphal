@@ -178,6 +178,17 @@ alias_arbiter <- function(IDs, RefIDs, aliasIDs, outputIDs = NULL,
     aliasIDs <- strsplit(aliasIDs, sep, fixed = TRUE)
   }
 
+  # Curate aliases to remove source
+  aliasID_df <- data.frame(
+    ref = rep(RefIDs, sapply(aliasIDs, length)),
+    alias = unlist(aliasIDs),
+    stringsAsFactors = FALSE)
+  aliasID_df <- aliasID_df[aliasID_df$ref != aliasID_df$alias,]
+  aliasID_df <- aggregate(alias ~ ref, data = aliasID_df, function(x){
+    paste(x[!x %in% RefIDs], collapse = sep)})
+  aliasIDs <- strsplit(aliasID_df$alias, sep)
+  names(aliasIDs) <- aliasID_df$ref
+  
   # Check for ambiguous aliases
   ambi_alias <- table(unlist(aliasIDs))
   ambi_alias <- names(ambi_alias[ambi_alias > 1])
@@ -186,15 +197,19 @@ alias_arbiter <- function(IDs, RefIDs, aliasIDs, outputIDs = NULL,
       "Ambiguous aliases removed : ", paste(ambi_alias, collapse = ", "), ".")
   }
 
-  # Remove RefIDs and ambiguous aliases from aliasIDs
-  aliasIDs <- lapply(1:length(aliasIDs), function(i){
-    aliasIDs[[i]][!aliasIDs[[i]] %in% c(RefIDs, ambi_alias, "")]
-  })
+  # Remove ambiguous aliases from aliasIDs
+  aliasID_df2 <- data.frame(
+    ref = rep(names(aliasIDs), sapply(aliasIDs, length)),
+    alias = unlist(aliasIDs, use.names = FALSE),
+    stringsAsFactors = FALSE)
+  aliasID_df2 <- aliasID_df2[!aliasID_df2$alias %in% ambi_alias,]
+  aliasIDs <- split(aliasID_df2$alias, aliasID_df2$ref)
 
   # Create graph of aliases and reference IDs
   E <- data.frame(
-    vi = rep(RefIDs, sapply(aliasIDs, length)),
-    vj = unlist(aliasIDs))
+    vi = rep(names(aliasIDs), sapply(aliasIDs, length)),
+    vj = unlist(aliasIDs, use.names = FALSE),
+    stringsAsFactors = FALSE)
   V <- data.frame(v = unique(c(RefIDs, unlist(aliasIDs))))
   G <- construct_graph(E, V, mode = "directed")
 
